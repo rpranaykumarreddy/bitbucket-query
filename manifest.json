@@ -12,6 +12,9 @@
     "background": {
         "service_worker": "commander.js"
     },
+    "omnibox": {
+        "keyword": "bql"
+    },
     "web_accessible_resources": [
         {
             "resources": [
@@ -43,6 +46,7 @@
             "permissions": [
                 "storage",
                 "tabs",
+                "notifications",
                 "activeTab"
             ]
         }

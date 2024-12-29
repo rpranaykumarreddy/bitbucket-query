@@ -31,7 +31,7 @@ It needs support of opening models by custom implementation. Tag actions for fea
    regex: `SET ?1`  
    possible sub-queries: NONE  
 
-2. IN:  
+2. IN: (Tentatively removed)
    This helps user to navigate to the workspace without changing the default workspace.  
    It can take value directly or if value is cached, it can be selected from the list.  
    
@@ -43,7 +43,7 @@ It needs support of opening models by custom implementation. Tag actions for fea
 3. LIST:
    This helps user to list the repositories in the workspace.  
    It can take value of the workspace or default workspace will be taken.  
-   Will take user to https://bitbucket.org/{{workspace}}/workspace/overview/  
+   Will take user to https://bitbucket.org/{{workspace}}/workspace/repositories/  
 
    regex: `LIST` or `LIST ?1`  
 
@@ -54,75 +54,79 @@ It needs support of opening models by custom implementation. Tag actions for fea
 
    regex: `OPEN ?1`
    possible sub-queries:
-   - BRANCH {{branch}}
-     To open source code of the branch.
-     regex: `OPEN ?1 BRANCH ?2`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/src/{{branch}}
-   - TAG {{tag}}
-     To open source code of the tag.
-     regex: `OPEN ?1 TAG ?2`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/src/{{tag}}
-   - COMMIT
-     To open commit history of default branch of the repository.
-     regex: `OPEN ?1 COMMIT`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/commits
-   - BRANCH {{branch}} COMMIT
-     To open commit history of the branch.
-     regex: `OPEN ?1 BRANCH ?2 COMMIT`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/commits/branch/{{branch}}
-   - TAG {{tag}} COMMIT
-     To open commit history of the tag.
-     regex: `OPEN ?1 TAG ?2 COMMIT`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/commits/tag/{{tag}}
    - BRANCH
      To open branches of the repository.
      regex: `OPEN ?1 BRANCH`
      https://bitbucket.org/{{inherited_workspace}}/{{repo}}/branches
-   - PR
-     To open pull requests of the repository.
-     regex: `OPEN ?1 PR`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/pull-requests
-   - PIPELINE
-     to open pipelines of the repository.
-     regex: `OPEN ?1 PIPELINE`
-        https://bitbucket.org/{{inherited_workspace}}/{{repo}}/pipelines
-   - DEPLOY
-     to open deployments of the repository.
-     regex: `OPEN ?1 DEPLOY`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/deployments
-   - COMMIT {{commit}}
-     To open commit details of the commit.
-     regex: `OPEN ?1 COMMIT ?2`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/commits/{{commit}}
+   - BRANCH {{branch}}
+     To open source code of the branch.
+     regex: `OPEN ?1 BRANCH ?2`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/src/{{branch}}
+   - BRANCH {{branch}} COMMIT
+     To open commit history of the branch.
+     regex: `OPEN ?1 BRANCH ?2 COMMIT`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/commits/branch/{{branch}}
    - BRANCH {{branch}} COMMIT {{commit}}
      To open commit details of the commit in the branch.
      regex: `OPEN ?1 BRANCH ?2 COMMIT ?3`
      https://bitbucket.org/{{inherited_workspace}}/{{repo}}/commits/{{commit}}
+   - TAG {{tag}}
+     To open source code of the tag.
+     regex: `OPEN ?1 TAG ?2`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/src/{{tag}}
+   - TAG {{tag}} COMMIT
+     To open commit history of the tag.
+     regex: `OPEN ?1 TAG ?2 COMMIT`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/commits/tag/{{tag}}
+   - TAG {{tag}} COMMIT {{commit}}
+     To open commit details of the commit in the tag.
+     regex: `OPEN ?1 TAG ?2 COMMIT ?3`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/commits/{{commit}}
+   - COMMIT
+     To open commit history of default branch of the repository.
+     regex: `OPEN ?1 COMMIT`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/commits
+   - COMMIT {{commit}}
+     To open commit details of the commit.
+     regex: `OPEN ?1 COMMIT ?2`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/commits/{{commit}}
+   - PR
+     To open pull requests of the repository.
+     regex: `OPEN ?1 PR`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/pull-requests
+   - PR {{pr}}  
+     Open a pull request.  
+     regex: `OPEN ?1 PR ?2`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/pull-requests/{{pr}}
+   - PIPELINE
+     to open pipelines of the repository.
+     regex: `OPEN ?1 PIPELINE`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/pipelines
+   - PIPELINE {{pipeline}}  
+     Open a pipeline.  
+     regex: `OPEN ?1 PIPELINE ?2`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/pipelines/results/{{pipeline}}
+   - DEPLOY
+     to open deployments of the repository.
+     regex: `OPEN ?1 DEPLOY`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/deployments
+   - DEPLOY {{deploy}}
+     Open a deployment.
+     Need to be id instead of name.
+     regex: `OPEN ?1 DEPLOY ?2`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/deployments/{{deploy_id}}
    - COMPARE {{branch}} TO {{compare}}
      To compare two branches or tags.
      regex: `OPEN ?1 COMPARE ?2 TO ?3`
      https://bitbucket.org/{{inherited_workspace}}/{{repo}}/branches/compare/{{branch}}..{{compare}}
    - DIFF {{branch}}  
      Diff a branch with default branch.
-      regex: `OPEN ?1 DIFF ?2`
-      https://bitbucket.org/{{inherited_workspace}}/{{repo}}/branch/{{branch}}
+     regex: `OPEN ?1 DIFF ?2`
+     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/branch/{{branch}}
    - DIFF {{branch}} TO {{compare}}  
      Diff a branch with another branch.  
      regex: `OPEN ?1 DIFF ?2 TO ?3`
      https://bitbucket.org/{{inherited_workspace}}/{{repo}}/branch/{{branch}}?dest={{compare}}
-   - PR {{pr}}  
-     Open a pull request.  
-     regex: `OPEN ?1 PR ?2`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/pull-requests/{{pr}}
-   - PIPELINE {{pipeline}}  
-     Open a pipeline.  
-     regex: `OPEN ?1 PIPELINE ?2`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/pipelines/results/{{pipeline}}
-   - DEPLOY {{deploy}}
-     Open a deployment.
-     Need to be id instead of name.
-     regex: `OPEN ?1 DEPLOY ?2`
-     https://bitbucket.org/{{inherited_workspace}}/{{repo}}/deployments/{{deploy_id}}
 
 ### Scrape:
 We need to scrape the data from the page and store it in the extension storage for quick access.
