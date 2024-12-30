@@ -869,9 +869,6 @@ function processOpen(fragments) {
                 message = `Diffing branch "${branchDiff}" with default branch of "${repositoryName}" in workspace "${workspaceName}"`;
             }
             break;
-        default:
-            notifyUser('Invalid command', 'Please enter a valid command');
-            return;
     }
     openTab(url);
     notifyUser(title, message);
