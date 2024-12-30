@@ -390,7 +390,7 @@ function defaultSuggest(suggest) {
 }
 
 function suggestionEngine(fragments, suggest) {
-    const command = fragments[0].toUpperCase();
+    const command = fragments[0]?.toUpperCase();
     let suggestions = [];
     switch (command) {
         case 'SET':
@@ -695,7 +695,7 @@ function processInput(fragments) {
         notifyUser('No command', 'Please enter a command');
         return;
     }
-    const command = fragments[0].toUpperCase();
+    const command = fragments[0]?.toUpperCase();
     switch (command) {
         case 'SET':
             processSet(fragments);
@@ -750,7 +750,7 @@ function processOpen(fragments) {
     let url = `https://bitbucket.org/${workspaceName}/${repositoryName}/overview/`;
     let title = `Opening repository "${repositoryName}"`;
     let message = `Opening repository "${repositoryName}" in workspace "${workspaceName}"`;
-    switch (fragments[2].toUpperCase()) {
+    switch (fragments[2]?.toUpperCase()) {
         case 'BRANCH':
             const branch = fragments[3]?.toLowerCase() || '';
             if (branch === '') {
