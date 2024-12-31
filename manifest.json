@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Bitbucket Query Language",
-    "version": "0.0.1",
+    "version": "1.0.0",
     "description": "A Chrome extension to developers & students to navigate through Bitbucket repositories using a query language.",
     "icons": {
         "16": "logo16.png",
@@ -27,7 +27,7 @@
                 "*"
             ],
             "exclude_matches": [
-                "./.git/*"
+                "./.git/*", "./.idea/*,./plan.md"
             ]
         }
     ],
@@ -41,12 +41,11 @@
                 "solider.css"
             ],
             "matches": [
-                "<all_urls>"
+                "https://bitbucket.org/*"
             ],
             "permissions": [
                 "storage",
                 "tabs",
-                "notifications",
                 "activeTab"
             ]
         }
@@ -54,10 +53,6 @@
     "permissions": [
         "storage",
         "notifications",
-        "contextMenus",
-        "offscreen",
-        "tabs",
-        "favicon",
-        "alarms"
+        "tabs"
     ]
 }

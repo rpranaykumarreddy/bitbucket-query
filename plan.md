@@ -12,10 +12,6 @@ Sample:
 
 Quickly navigate to repositories, branches, commits, tags, pull requests, pipelines, deployments, and compare branches.
 
-### **Mark tabs as group:** (version 2.0)
-
-Mark tabs as group & name them for quick opening.
-
 ### **MULTIPLE QUERY SUPPORT & TAG** (version 2.0)
 
 It needs support of opening models by custom implementation. Tag actions for feature for quick open like espanso.
