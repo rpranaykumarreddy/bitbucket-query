@@ -15,6 +15,7 @@
     "omnibox": {
         "keyword": "bql"
     },
+    "key": "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCXXygi5XTI1DDZgs7I1wXP60kAf5VH23wf6WEHlzwCk/f1ZhcLDvpYneJ0FsuULME/lsDUHzKsbZ0esmpYpccCWMCGkFRSeicbUqN6TdWomQNFaoP3t77jBx2w7SMNFSeLC/o5DE64Chvl6rIMyZ0AP72UG42ZypIYQpTuv8dFxz7T/gplUUHIzRROnd86pNITU7ssdmk0JzOWdLugvXi/5ewrPbW/6EerZswfNuk57Dr3KiT66GPwftuDLTGhEwWqs85ZwzjXaMX4gPMIxvWQaZZlmTHhw3gmp2lOHFN+t+tpeBt5lQNCKguevbGC2bYx+WIE2a4MGVWCORdBMLjDAgMBAAECggEADMSiBg+EwkvjsvUtrBM3EkquZbRdSypgVfDBlnpTPYRtre1mlDA3PbJTn6cslNsRkeONcFcRVyoHzscN4VxaZQBHfRI/ipVzJwLZdz+Jficp93j8mLCPEWdQQdQ+2KOoKjpgaN945F017TbWve1jqNm3i/6m+wnzOMik916F2ITMukFR19jL5QzF1w02mlx8kxR9k5zNSHaN3mRDosYgjY41YHjmbCusbhZODa/QLvWg17/HZ8CBaI/jaQ64cWnfAfvnWzefUDtBz30NBEtZe7VfkvH6IHyiJaQ0WqoLkZb0acBTEhYszTKMyP3q0TcsndvNjfYOXHXd8Q/LcRKYAQKBgQDFfckN83ZqyX4Fk1jfrLLconQgawNjTpo7tCXRbZnGsbowxgRsLHcbpPE70VhmdmUKkDS1e3VrWhWy5b3CHH6MSNdrynjD/Zu1/+awpBSSXPcv//Jvpwus/KJjtaTeY/uyCzxomwqQsUYokWqZMRU2uzs2sw5MNPBJ2c32TWqnQwKBgQDEN4w6oYYymuDkUemZUoaRzXGK0gK6E0/qsDHsd5icxIDOWdGa2J/TB3GqyzB8JurbUFSv+5AvXmiaraM7pRMocIuPDshNN2muCbKAkj+kctn7UHZcmrqirT65VF91Tnw5Vd0A7aw2ZHaBFPq+tDjtohG9NLrhiee68YHjyITQgQKBgQCoSQAa8DwW0O2fCKjxqHKdSZ0UxruTUrZga6jSJcekpWuYBhRcrSMtnkalh0UBwp9k+e7AOpyaxp+42sXw82DuX1+ZjWWM9L1Lv+yu1pJlCezkrP/EHp73YCtsNatwidg/Jg3qwTqmgzjadtdUBJwkEDVr7fYf//hFpeA4ok1giwKBgQCXRjQIZ8ssbJeBr10nZaZ19ivZWLvddVIhn6F9q16vThf3/utINEZTzeNmR6yjquVaG/6OhqXMvz5qMgAs1cGFZe9SZZUrYtNI6BUEZrxGLn278XavQmMtU9+Nxmyp5c6D7ZyrQJGKhb2PGvuN1ygknNSMSIDjrQxI5jS7xjYPAQKBgEPd38SFXlyo/SLV+ZUfPqt3TF95MkDorayPFC9vt0/DR6FgiN+2blsMsS8jPX7q5sg14zsyNVA9EoXfv8qwFypHp/fq7dfkR+z7kaGcPVz12bShutp8zpb/LFhFZsc9IlNbNFBCthqI9oZ9vy4FfUW6Da0IEomMXKpVQl7kFADy",
     "web_accessible_resources": [
         {
             "resources": [
@@ -36,9 +37,6 @@
             "run_at": "document_end",
             "js": [
                 "solider.js"
-            ],
-            "css": [
-                "solider.css"
             ],
             "matches": [
                 "https://bitbucket.org/*"
