@@ -12,7 +12,7 @@
     <h1>Bitbucket Query Language | Help</h1>
     <h4>This extension helps you to navigate through Bitbucket repositories with ease.<br/>
         You can use the commands to open the repositories, branches, tags, commits, pull requests, pipelines, deployments, and compare branches or tags.</h4>
-    <h3>Type <code>open</code> to start querying Bitbucket. If you new to BQL, please go through the list of commands below.</h3>
+    <h3>Type <code>open</code> to start querying Bitbucket. If you're new to BQL, please go through the list of commands below.</h3>
 </header>
 <table>
     <thead>
@@ -128,13 +128,41 @@
             <td>Diff branches or tags</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/branch/<code>from-branch-or-tag</code>?dest=<code>to-branch-or-tag</code></td>
         </tr>
+        <tr>
+            <td>MICRO <code>macro-name</code> (optional <code>any query of branch, tag, commit, pr, pipeline, deploy, compare, diff</code>)</td>
+            <td>Perform a query on the repositories in the macro</td>
+            <td>-</td>
+        <tr>
+            <td>MACRO</td>
+            <td>List all the macros available</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>MACRO LIST <code>macro-name</code></td>
+            <td>List all the repositories in the macro</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>MACRO NEW <code>macro-name</code></td>
+            <td>Add a new macro</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>MACRO REMOVE <code>macro-name</code></td>
+            <td>Remove a macro</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>MACRO EDIT <code>macro-name</code> REMOVE <code>repository-name</code></td>
+            <td>Remove a repository from the macro</td>
+            <td>-</td>
+        </tr>
     </tbody>
 </table>
 
 <br/>
 <h2>📰Upcoming Features</h2>
 <ul>
-    <li>Macros: To perform a query on multiple repositories.</li>
     <li>Open the source file.</li>
     <li>Open the source file at a specific line number.</li>
     <li>Open the source file at a specific line number and column number.</li>

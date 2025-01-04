@@ -7,23 +7,63 @@ chrome.runtime.onInstalled.addListener(() => {
 var bitbucketQueryData = {
     active: null,
     workspaces: {},
+    macro: {},
     isLoaded: false
 }
 
 loadFromLocalStorage();
 
 function loadFromLocalStorage() {
-    chrome.storage.local.get(["workspaces", "active"], (result) => {
+    chrome.storage.local.get(["workspaces", "active", "macro"], (result) => {
         if (result.workspaces === undefined) {
             saveToLocalStorage();
             console.log("No data found in local storage, so created a new one");
         } else {
             bitbucketQueryData = result;
+            if (bitbucketQueryData.macro === undefined) {
+                bitbucketQueryData.macro = {};
+            }
             console.log("Data found & it is set to", bitbucketQueryData);
         }
         bitbucketQueryData.isLoaded = true;
     });
+    refreshContextMenu();
 }
+
+/* Context Menu Setup*/
+function refreshContextMenu() {
+    chrome.contextMenus.removeAll();
+    var parent1 = chrome.contextMenus.create({
+        id: "macroParent",
+        "title": "Add this repo to macro",
+        "contexts": ["all"]
+    });
+    Object.keys(bitbucketQueryData.macro).map(macro => {
+        chrome.contextMenus.create({id: "macro" + macro, "title": macro, "parentId": parent1, "contexts": ["all"]});
+    });
+}
+
+function contextClick(info, tab) {
+    const {linkUrl, pageUrl, menuItemId} = info;
+    if (menuItemId.includes("macro")) {
+        const menu = menuItemId.split("macro")[1];
+        const fragments = (linkUrl || pageUrl).split("bitbucket.org/")[1].split("/");
+        const workspaceName = fragments[0];
+        const repositoryName = fragments[1];
+        if (bitbucketQueryData.macro[menu] === undefined) {
+            bitbucketQueryData.macro[menu] = [];
+        }
+        const key = `${workspaceName}/${repositoryName}`;
+        if (!bitbucketQueryData.macro[menu].includes(key)) {
+            bitbucketQueryData.macro[menu].push(key);
+            notifyUser("Added to macro", `Added ${repositoryName} of ${workspaceName} to ${menu}`);
+        } else {
+            notifyUser("Already in macro", `${repositoryName} of ${workspaceName} is already in ${menu}`);
+        }
+    }
+}
+
+chrome.contextMenus.onClicked.addListener(contextClick);
 
 chrome.runtime.onMessage.addListener(
     function (request, sender, sendResponse) {
@@ -56,7 +96,7 @@ function processScrapedData(data) {
     if (type === 'workspace') {
         processWorkspaceData(workspaceName);
     } else if (type === 'repositories') {
-        let repositories = data.repositories.map(repo => repo.toLowerCase().trim()).filter(repo => repo.length > 0);
+        let repositories = data.repositories.map(repo => repo?.toLowerCase().trim()).filter(repo => repo.length > 0);
         processRepositoriesData(workspaceName, repositories);
     } else {
         let repositoryName = data.repositoryName?.toLowerCase().trim() || '';
@@ -381,16 +421,11 @@ chrome.omnibox.onInputChanged.addListener(function (text, suggest) {
     console.log('✏️ onInputChanged: ' + text);
     const fragments = text.trim().split(' ').map(fragment => fragment.trim()).filter(fragment => fragment.length > 0);
     console.log('fragments', fragments);
-    if (fragments.length === 0) {
-        defaultSuggest(suggest);
-        return;
-    }
     suggestionEngine(fragments, suggest);
 });
 
-function defaultSuggest(suggest) {
-    const suggestions =
-        [
+function defaultSuggest() {
+    return [
             {
                 content: 'SET',
                 description: 'SET "workspace-name" : Set the active workspace'
@@ -402,14 +437,20 @@ function defaultSuggest(suggest) {
             {
                 content: 'HELP',
                 description: 'HELP : Get to new tab with all the commands'
+            },
+            {
+                content: 'MACRO',
+                description: 'MACRO : Get to new tab for setting up macros'
+            },
+            {
+                content: ' ',
+                description: '"repo-name" : Open the repository'
             }
         ];
-    suggestOpen([]).map(suggestion => suggestions.push(suggestion));
-    suggest(suggestions);
 }
 
 function suggestionEngine(fragments, suggest) {
-    const command = fragments[0]?.toUpperCase();
+    const command = fragments[0]?.toUpperCase() || '';
     let suggestions = [];
     switch (command) {
         case 'SET':
@@ -428,13 +469,22 @@ function suggestionEngine(fragments, suggest) {
                 }
             ])
             break;
+        case 'MACRO':
+            suggestions = suggestMacro(fragments);
+            suggest(suggestions);
+            break;
         case '':
             console.log('Unknown command');
-            defaultSuggest(suggest);
+            const defaultSuggestions = defaultSuggest(suggest);
+            const openSuggestions = suggestOpen([]);
+            suggest(defaultSuggestions.concat(openSuggestions));
             break;
         default:
+            const defaultSuggestionsFiltered = defaultSuggest(suggest)
+                .filter(suggestion => suggestion.content.includes(command))
+                .filter(suggestion => suggestion.content.trim() !== command);
             suggestions = suggestOpen(fragments);
-            suggest(suggestions);
+            suggest(defaultSuggestionsFiltered.concat(suggestions));
     }
 }
 
@@ -468,6 +518,86 @@ function suggestList(fragments) {
             suggestions.push(
                 createSuggestion(`LIST ${workspaceName}`, "List the repositories in the workspace"));
         });
+    return suggestions;
+}
+
+function suggestMacro(fragments) {
+    const commandName = fragments[1]?.toLowerCase() || '';
+    const subCommandName = fragments[2]?.toUpperCase() || '';
+    const suggestions = [];
+    const macroKeys = Object.keys(bitbucketQueryData.macro)
+        .filter(macro => macro.includes(commandName));
+    if (macroKeys.length === 1) {
+        const macro = macroKeys[0];
+        const tempSuggestions = [
+            createSuggestion(`MACRO ${macro}`, `Open the source of all the repos in the macro`),
+            createSuggestion(`MACRO ${macro} BRANCH`, `Open the branches of all the repos in the macro`),
+            createSuggestion(`MACRO ${macro} BRANCH`, `<branch-name> Open the branch in all the repos in the macro`),
+            createSuggestion(`MACRO ${macro} TAG`, `<tag-name>Open the tag in all the repos in the macro`),
+            createSuggestion(`MACRO ${macro} PR`, `Open the pull requests in all the repos in the macro`),
+            createSuggestion(`MACRO ${macro} PIPELINE`, `Open the pipelines in all the repos in the macro`),
+            createSuggestion(`MACRO ${macro} DEPLOY`, `Open the deployments in all the repos in the macro`),
+            createSuggestion(`MACRO ${macro} COMPARE`, `<from> TO <to>Compare branches or tags in all the repos in the macro`),
+            createSuggestion(`MACRO ${macro} DIFF`, `<from> Diff branches or tags in all the repos in the macro with default branch`),
+            createSuggestion(`MACRO ${macro} DIFF`, `<from> TO <to>Diff branches or tags in all the repos in the macro`)
+        ]
+        tempSuggestions.filter(suggestion => {
+            const content = suggestion.content.split(' ');
+            const lastFragment = content[2] || "";
+            return lastFragment.includes(subCommandName);
+        }).map(suggestion => suggestions.push(suggestion));
+    } else {
+        macroKeys
+            .map(macro => {
+                suggestions.push(createSuggestion(`MACRO ${macro}`, "Run commands over multiple repositories"));
+            });
+    }
+    if ('list'.includes(commandName) || commandName === '') {
+        if (commandName === 'list') {
+            Object.keys(bitbucketQueryData.macro)
+                .filter(macro => macro.includes(subCommandName))
+                .map(macro => {
+                    suggestions.push(createSuggestion(`MACRO LIST ${macro}`, "List all the repositories in the macro"));
+                });
+        } else {
+            suggestions.push(createSuggestion(`MACRO LIST`, "{name} List all the macros"));
+        }
+    }
+    if ('new'.includes(commandName) || commandName === '') {
+        suggestions.push(createSuggestion(`MACRO NEW`, "{name} Add a new macro"));
+    }
+    if ('remove'.includes(commandName) || commandName === '') {
+        if (commandName === 'remove') {
+            Object.keys(bitbucketQueryData.macro)
+                .filter(macro => macro.includes(subCommandName))
+                .map(macro => {
+                    suggestions.push(createSuggestion(`MACRO REMOVE ${macro}`, "Remove the macro"));
+                });
+        } else {
+            suggestions.push(createSuggestion(`MACRO REMOVE`, "{name} Remove a macro"));
+        }
+    }
+    if ('edit'.includes(commandName) || commandName === '') {
+        if (commandName === 'edit') {
+            const macroKeys = Object.keys(bitbucketQueryData.macro)
+                .filter(macro => macro.includes(subCommandName));
+            if (macroKeys.length > 1) {
+                macroKeys.map(macro => {
+                    suggestions.push(createSuggestion(`MACRO EDIT ${macro}`, "Edit the macro"));
+                });
+            } else if (macroKeys.length === 1) {
+                const macro = macroKeys[0];
+                const repoCommand = fragments[4] || '';
+                bitbucketQueryData.macro[macro]
+                    .filter(repo => repo.includes(repoCommand))
+                    .map(repo => {
+                        suggestions.push(createSuggestion(`MACRO EDIT ${macro} REMOVE ${repo}`, "Remove the repo from the macro"));
+                    });
+            }
+        } else {
+            suggestions.push(createSuggestion(`MACRO EDIT`, "{name} Edit a macro"));
+        }
+    }
     return suggestions;
 }
 
@@ -707,6 +837,9 @@ function processInput(fragments) {
             case 'HELP':
                 chrome.tabs.create({url: 'help.html'});
                 break;
+            case 'MACRO':
+                processMacro(fragments);
+                break;
             default:
                 processOpen(fragments);
         }
@@ -760,6 +893,90 @@ function processOpen(fragments) {
     openTab(url + urlSuffix);
 }
 
+function processMacro(fragments) {
+    const macroName = fragments[1]?.toLowerCase() || '';
+    if (macroName === '') {
+        const macroKeys = Object.keys(bitbucketQueryData.macro);
+        if (macroKeys.length === 0) {
+            notifyUser('No macros found', 'No macros found');
+            return;
+        }
+        notifyUser('Macros', macroKeys.join(', '));
+        return;
+    }
+    const blockedMacros = ['LIST', 'NEW', 'REMOVE', 'EDIT'];
+    if (bitbucketQueryData.macro[macroName] === undefined) {
+        const command = fragments[1]?.toUpperCase() || '';
+        const subCommand = fragments[2]?.toLowerCase() || '';
+        switch (command) {
+            case 'LIST':
+                const macro = fragments[2]?.toLowerCase() || '';
+                if (bitbucketQueryData.macro[macro] === undefined) {
+                    notifyUser('No macro found', `No macro found with the name "${macro}"`);
+                    return;
+                }
+                if (bitbucketQueryData.macro[macro].length === 0) {
+                    notifyUser('No repos found', `No repos found in the macro "${macro}"`);
+                    return;
+                }
+                notifyUser('Macros', bitbucketQueryData.macro[macro].join(', '));
+                break;
+            case 'NEW':
+                if (subCommand === '') {
+                    notifyUser('No macro name', 'Please enter a macro name');
+                    return;
+                }
+                if (blockedMacros.includes(subCommand?.toUpperCase())) {
+                    notifyUser('Macro name blocked', 'Please enter a name other than "LIST", "NEW", "REMOVE", "EDIT"');
+                    return;
+                }
+                const regex = /^[a-z0-9-]+$/;
+                if (!regex.test(subCommand)) {
+                    notifyUser('Invalid macro name', 'Only letters (a-z), numbers (0-9), and hyphens (-) are allowed.');
+                    return;
+                }
+                if (bitbucketQueryData.macro[subCommand] !== undefined) {
+                    notifyUser('Macro already exists', `Macro "${subCommand}" already exists`);
+                    return;
+                }
+                bitbucketQueryData.macro[subCommand] = [];
+                saveToLocalStorage();
+                notifyUser('New macro created', `New macro "${subCommand}" created`);
+                break;
+            case 'REMOVE':
+                delete bitbucketQueryData.macro[subCommand];
+                saveToLocalStorage();
+                notifyUser('Macro removed', `Macro "${subCommand}" removed`);
+                break;
+            case 'EDIT':
+                const removeCommand = fragments[3]?.toUpperCase() || '';
+                const repoName = fragments[4]?.toLowerCase() || '';
+                if (repoName !== '' && removeCommand === 'REMOVE') {
+                    const repoIndex = bitbucketQueryData.macro[subCommand].indexOf(repoName);
+                    if (repoIndex !== -1) {
+                        bitbucketQueryData.macro[subCommand].splice(repoIndex, 1);
+                        saveToLocalStorage();
+                        notifyUser('Repo removed', `Repo "${repoName}" removed from the macro "${subCommand}"`);
+                    } else {
+                        notifyUser('No repo found', `No repo found with the name "${repoName}" in the macro "${subCommand}"`);
+                    }
+                    return;
+                }
+                notifyUser('invalid command', 'Please enter a valid command, "MACRO EDIT {macro-name} REMOVE {repo-name}"');
+                break;
+            default:
+                notifyUser('No macro found', `No macro found with the name "${macroName}"`);
+        }
+        return;
+    }
+    const repositories = bitbucketQueryData.macro[macroName];
+    fragments.shift();
+    const urlSuffix = getSuffixPathForOpen(fragments);
+    repositories.map(repository => {
+        const url = `https://bitbucket.org/${repository}/`;
+        openTab(url + urlSuffix);
+    });
+}
 
 function getSuffixPathForOpen(fragments) {
     switch (fragments[1]?.toUpperCase()) {
@@ -855,6 +1072,7 @@ function saveToLocalStorage() {
     chrome.storage.local.set(bitbucketQueryData).then(() => {
         console.log(bitbucketQueryData, "Data is set to local storage");
     });
+    refreshContextMenu();
 }
 
 /*Text utility*/
