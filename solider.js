@@ -100,7 +100,7 @@ function scrapeDataSwitch(type, fragments) {
             return {branches: [fragments.slice(4).join("/")], type: "branches"};
         case "branches":
             return fragments[4] === "compare"
-                ? { branches: fragments[5].split("%0D") }
+                ? { branches: []} // Removed as it can be tag or branch
                 : { branches: scrapeDataFromBranchesPage() };
         case "pull-requests":
             if (fragments[4] && !isNaN(fragments[4])) {
@@ -161,7 +161,7 @@ function scrapeDataFromCommitsPage() {
 function scrapeDataFromCommitOverviewPage() {
     var branches = [];
     var tags = [];
-    var message = document.querySelectorAll('[data-testid="profileCardTrigger"]')[0]?.parentElement?.parentElement?.nextElementSibling?.innerText;
+    var message = document.querySelectorAll('[aria-label="Global comments"]')[0]?.previousElementSibling?.innerText || "";
     const elements = document.getElementsByClassName("sidebar-expander-panel-heading");
     const branchElement = Array.from(elements).filter(a => a.innerText.includes("branch"));
     if (branchElement.length > 0 && branchElement[0]?.parentElement?.nextSibling !== null) {

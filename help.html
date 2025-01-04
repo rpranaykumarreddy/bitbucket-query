@@ -12,7 +12,7 @@
     <h1>Bitbucket Query Language | Help</h1>
     <h4>This extension helps you to navigate through Bitbucket repositories with ease.<br/>
         You can use the commands to open the repositories, branches, tags, commits, pull requests, pipelines, deployments, and compare branches or tags.</h4>
-    <h3>Type <code>bql</code> to start querying Bitbucket. If you new to BQL, please go through the list of commands below.</h3>
+    <h3>Type <code>open</code> to start querying Bitbucket. If you new to BQL, please go through the list of commands below.</h3>
 </header>
 <table>
     <thead>
@@ -34,97 +34,97 @@
             <td>bitbucket.org/<code>workspaceName</code>/workspace/repositories</td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code></td>
+            <td><code>repository-name</code></td>
             <td>Open the repository default source page</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/overview</td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> BRANCH</td>
+            <td><code>repository-name</code> BRANCH</td>
             <td>Open the branches of the repository</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/branches</td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> BRANCH <code>branch-name</code></td>
+            <td><code>repository-name</code> BRANCH <code>branch-name</code></td>
             <td>Open the source page of the branch</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/src/<code>branch-name</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> BRANCH <code>branch-name</code> COMMIT</td>
+            <td><code>repository-name</code> BRANCH <code>branch-name</code> COMMIT</td>
             <td>Open the commit history of the branch</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/commits/branch/<code>branch-name</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> BRANCH <code>branch-name</code> COMMIT <code>commit-id</code></td>
+            <td><code>repository-name</code> BRANCH <code>branch-name</code> COMMIT <code>commit-id</code></td>
             <td>Open the commit details</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/commits/<code>commit-id</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> TAG <code>tag-name</code></td>
+            <td><code>repository-name</code> TAG <code>tag-name</code></td>
             <td>Open the source page of the tag</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/src/<code>tag-name</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> TAG <code>tag-name</code> COMMIT</td>
+            <td><code>repository-name</code> TAG <code>tag-name</code> COMMIT</td>
             <td>Open the commit history of the tag</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/commits/tag/<code>tag-name</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> TAG <code>tag-name</code> COMMIT <code>commit-id</code></td>
+            <td><code>repository-name</code> TAG <code>tag-name</code> COMMIT <code>commit-id</code></td>
             <td>Open the commit details</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/commits/<code>commit-id</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> COMMIT</td>
+            <td><code>repository-name</code> COMMIT</td>
             <td>Open the commit history of the repository</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/commits</td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> COMMIT <code>commit-id</code></td>
+            <td><code>repository-name</code> COMMIT <code>commit-id</code></td>
             <td>Open the commit details</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/commits/<code>commit-id</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> PR</td>
+            <td><code>repository-name</code> PR</td>
             <td>Open the pull requests of the repository</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/pull-requests</td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> PR <code>pull-request-no</code></td>
+            <td><code>repository-name</code> PR <code>pull-request-no</code></td>
             <td>Open the pull request details</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/pull-requests/<code>pull-request-no</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> PIPELINE</td>
+            <td><code>repository-name</code> PIPELINE</td>
             <td>Open the pipelines of the repository</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/pipelines</td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> PIPELINE <code>pipeline-no</code></td>
+            <td><code>repository-name</code> PIPELINE <code>pipeline-no</code></td>
             <td>Open the pipeline details</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/pipelines/results/<code>pipeline-no</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> DEPLOY</td>
+            <td><code>repository-name</code> DEPLOY</td>
             <td>Open the deployments of the repository</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/deployments</td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> DEPLOY <code>environment-name</code></td>
+            <td><code>repository-name</code> DEPLOY <code>environment-name</code></td>
             <td>Open the deployment details</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/deployments/<code>environment-name</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> COMPARE <code>from-branch-or-tag</code> TO <code>to-branch-or-tag</code></td>
+            <td><code>repository-name</code> COMPARE <code>from-branch-or-tag</code> TO <code>to-branch-or-tag</code></td>
             <td>Compare branches or tags</td>
-            <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/branches/compare/<code>from-branch-or-tag</code>...<code>to-branch-or-tag</code></td>
+            <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/branches/compare/<code>from-branch-or-tag</code>%0D<code>to-branch-or-tag</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> DIFF <code>branch-name-or-tag</code></td>
+            <td><code>repository-name</code> DIFF <code>branch-name-or-tag</code></td>
             <td>Diff branch or tag to the default branch or tag</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/branch/<code>branch-name-or-tag</code></td>
         </tr>
         <tr>
-            <td>Open <code>repository-name</code> DIFF <code>from-branch-or-tag</code> TO <code>to-branch-or-tag</code></td>
+            <td><code>repository-name</code> DIFF <code>from-branch-or-tag</code> TO <code>to-branch-or-tag</code></td>
             <td>Diff branches or tags</td>
             <td>bitbucket.org/<code>workspaceName</code>/<code>repositoryName</code>/branch/<code>from-branch-or-tag</code>?dest=<code>to-branch-or-tag</code></td>
         </tr>

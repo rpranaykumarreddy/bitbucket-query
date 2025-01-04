@@ -1,7 +1,7 @@
 console.log("I am the BQL Commander in charge of the BQL extension");
 
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.tabs.create({ url: 'help.html' });
+    chrome.tabs.create({url: 'help.html'});
 });
 
 var bitbucketQueryData = {
@@ -84,9 +84,9 @@ function processScrapedData(data) {
                         message: message
                     }
                 }).filter(commit => commit.commitId.length > 0);
-                const commitsBranches = commitData.branches || [];
+                const commitsBranches = data.branches || [];
                 const mappedCommitsBranches = commitsBranches.map(branch => branch.trim()).filter(branch => branch.length > 0)
-                const commitsTags = commitData.tags || [];
+                const commitsTags = data.tags || [];
                 const mappedCommitsTags = commitsTags.map(tag => tag.trim()).filter(tag => tag.length > 0);
                 processCommitsData(workspaceName, repositoryName, mappedCommitsBranches, mappedCommitsTags, commitData);
                 break;
@@ -125,7 +125,6 @@ function processWorkspaceData(workspaceName) {
     if (bitbucketQueryData.workspaces[workspaceName] === undefined) {
         bitbucketQueryData.workspaces[workspaceName] = {
             lastUsed: new Date().getTime(),
-            count: 0,
             repositories: {}
         }
         if (bitbucketQueryData.active === null)
@@ -148,8 +147,7 @@ function processRepositoriesData(workspaceName, repositories) {
             pipelines: {},
             pullRequests: {},
             environments: {},
-            lastUsed: null,
-            count: 0
+            lastUsed: null
         }
     }
     accessedWorkspace(workspaceName);
@@ -171,8 +169,7 @@ function processBranchesData(workspaceName, repositoryName, branches) {
         if (bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].branches[branch] !== undefined)
             continue;
         bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].branches[branch] = {
-            lastUsed: null,
-            count: 0
+            lastUsed: null
         }
     }
     if (branches.length === 1) {
@@ -195,8 +192,7 @@ function processTagsData(workspaceName, repositoryName, tags) {
         if (bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].tags[tag] !== undefined)
             continue;
         bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].tags[tag] = {
-            lastUsed: null,
-            count: 0
+            lastUsed: null
         }
     }
     if (tags.length === 1) {
@@ -252,11 +248,15 @@ function processCommitsData(workspaceName, repositoryName, branches, tags, commi
         bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].commits[commitId] = {
             branches: branches,
             tags: tags,
-            message: message
+            message: message,
+            lastUsed: null
         }
     }
     accessedWorkspace(workspaceName);
     accessedRepository(workspaceName, repositoryName);
+    if (commits.length === 1) {
+        accessedCommit(workspaceName, repositoryName, commits[0].commitId);
+    }
 }
 
 function processPullRequestsData(workspaceName, repositoryName, pullRequests) {
@@ -274,8 +274,7 @@ function processPullRequestsData(workspaceName, repositoryName, pullRequests) {
         }
         bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].pullRequests[pullNo] = {
             pullName: pullName,
-            lastUsed: null,
-            count: 0
+            lastUsed: null
         }
     }
     if (pullRequests.length === 1) {
@@ -302,8 +301,7 @@ function processPipelineData(workspaceName, repositoryName, pipelines) {
         }
         bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].pipelines[pipelineNo] = {
             pipelineName: pipelineName,
-            lastUsed: null,
-            count: 0
+            lastUsed: null
         }
     }
     if (pipelines.length === 1) {
@@ -332,8 +330,7 @@ function processEnvironmentsData(workspaceName, repositoryName, environments) {
         }
         bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].environments[environmentName] = {
             environmentId: environmentId,
-            lastUsed: null,
-            count: 0
+            lastUsed: null
         }
     }
 
@@ -349,39 +346,34 @@ function processEnvironmentsData(workspaceName, repositoryName, environments) {
 /* General analytics utility */
 function accessedWorkspace(workspaceName) {
     bitbucketQueryData.workspaces[workspaceName].lastUsed = new Date().getTime();
-    bitbucketQueryData.workspaces[workspaceName].count++;
 }
 
 function accessedRepository(workspaceName, repositoryName) {
     bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].lastUsed = new Date().getTime();
-    bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].count++;
 }
 
 function accessedBranch(workspaceName, repositoryName, branch) {
     bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].branches[branch].lastUsed = new Date().getTime();
-    bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].branches[branch].count++;
 }
 
 function accessedTag(workspaceName, repositoryName, tag) {
     bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].tags[tag].lastUsed = new Date().getTime();
-    bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].tags[tag].count++;
 }
 
-// No analytics for commits.
+function accessedCommit(workspaceName, repositoryName, commitId) {
+    bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].commits[commitId].lastUsed = new Date().getTime();
+}
 
 function accessedPullRequest(workspaceName, repositoryName, pullNo) {
     bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].pullRequests[pullNo].lastUsed = new Date().getTime();
-    bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].pullRequests[pullNo].count++;
 }
 
 function accessedPipeline(workspaceName, repositoryName, pipelineNo) {
     bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].pipelines[pipelineNo].lastUsed = new Date().getTime();
-    bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].pipelines[pipelineNo].count++;
 }
 
 function accessedEnvironment(workspaceName, repositoryName, environmentName) {
     bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].environments[environmentName].lastUsed = new Date().getTime();
-    bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName].environments[environmentName].count++;
 }
 
 /* Omnibox: Search processing */
@@ -397,24 +389,23 @@ chrome.omnibox.onInputChanged.addListener(function (text, suggest) {
 });
 
 function defaultSuggest(suggest) {
-    suggest([
-        {
-            content: 'SET',
-            description: 'SET "workspace-name" - Set the active workspace'
-        },
-        {
-            content: 'LIST',
-            description: 'LIST "workspace-name" - Open the list of repositories in the workspace'
-        },
-        {
-            content: 'OPEN',
-            description: 'OPEN "repository-name" - Open the repository'
-        },
-        {
-            content: 'HELP',
-            description: 'HELP - Get to new tab with all the commands'
-        }
-    ]);
+    const suggestions =
+        [
+            {
+                content: 'SET',
+                description: 'SET "workspace-name" : Set the active workspace'
+            },
+            {
+                content: 'LIST',
+                description: 'LIST "workspace-name" : Open the list of repositories in the workspace'
+            },
+            {
+                content: 'HELP',
+                description: 'HELP : Get to new tab with all the commands'
+            }
+        ];
+    suggestOpen([]).map(suggestion => suggestions.push(suggestion));
+    suggest(suggestions);
 }
 
 function suggestionEngine(fragments, suggest) {
@@ -422,28 +413,28 @@ function suggestionEngine(fragments, suggest) {
     let suggestions = [];
     switch (command) {
         case 'SET':
-            suggestions = suggestSet(fragments, suggest);
+            suggestions = suggestSet(fragments);
             suggest(suggestions);
             break;
         case 'LIST':
-            suggestions = suggestList(fragments, suggest);
-            suggest(suggestions);
-            break;
-        case 'OPEN':
-            suggestions = suggestOpen(fragments, suggest);
+            suggestions = suggestList(fragments);
             suggest(suggestions);
             break;
         case 'HELP':
             suggest([
                 {
                     content: 'HELP',
-                    description: 'HELP - Get to new tab with all the commands'
+                    description: 'HELP : Get to new tab with all the commands'
                 }
             ])
             break;
-        default:
+        case '':
             console.log('Unknown command');
             defaultSuggest(suggest);
+            break;
+        default:
+            suggestions = suggestOpen(fragments);
+            suggest(suggestions);
     }
 }
 
@@ -453,10 +444,10 @@ function suggestSet(fragments) {
         .filter(workspace => workspace.includes(workspaceName))
         .filter(workspace => workspace !== bitbucketQueryData.active)
         .sort((a, b) => {
-            return bitbucketQueryData.workspaces[b].lastUsed - bitbucketQueryData.workspaces[a].lastUsed;
+            return sortOnLastUsed(bitbucketQueryData.workspaces, a, b);
         })
         .map(workspaceName => {
-            return createSuggestion(`SET ${workspaceName}`, `SET "${workspaceName}" - as the active workspace`);
+            return createSuggestion(`SET ${workspaceName}`, "As the active workspace");
         });
 }
 
@@ -465,198 +456,175 @@ function suggestList(fragments) {
     const suggestions = [];
     if (workspaceName === '') {
         suggestions.push(
-            createSuggestion(`LIST`, `LIST - List the repos in the ${bitbucketQueryData.active} workspace`));
+            createSuggestion("LIST", "List the repos in the ${bitbucketQueryData.active} workspace"));
     }
     Object.keys(bitbucketQueryData.workspaces)
         .filter(workspace => workspace.includes(workspaceName))
         .filter(workspace => workspace !== bitbucketQueryData.active || workspaceName !== '')
         .sort((a, b) => {
-            return bitbucketQueryData.workspaces[b].lastUsed - bitbucketQueryData.workspaces[a].lastUsed;
+            return sortOnLastUsed(bitbucketQueryData.workspaces, a, b);
         })
         .map(workspaceName => {
             suggestions.push(
-                createSuggestion(`LIST ${workspaceName}`, `LIST "${workspaceName}" - List the repositories in the workspace`));
+                createSuggestion(`LIST ${workspaceName}`, "List the repositories in the workspace"));
         });
     return suggestions;
 }
 
 function suggestOpen(fragments) {
-    const repositoryName = fragments[1] || '';
+    const repositoryName = fragments[0] || '';
     const workspaceName = bitbucketQueryData.active;
     const suggestions = [];
+    if (bitbucketQueryData.workspaces[workspaceName] === undefined) {
+        return [];
+    }
     if (bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName] === undefined) {
         Object.keys(bitbucketQueryData.workspaces[workspaceName].repositories)
             .filter(repository => repository.includes(repositoryName))
             .sort((a, b) => {
-                return bitbucketQueryData.workspaces[workspaceName].repositories[b].lastUsed - bitbucketQueryData.workspaces[workspaceName].repositories[a].lastUsed;
+                return sortOnLastUsed(bitbucketQueryData.workspaces[workspaceName].repositories, a, b);
             })
             .map(repositoryName => {
-                suggestions.push(createSuggestion(`OPEN ${repositoryName}`, `OPEN "${repositoryName}" - Open the repository`));
+                suggestions.push(createSuggestion(`${repositoryName}`, "Open the repository"));
             });
         return suggestions;
     }
     const repositoryData = bitbucketQueryData.workspaces[workspaceName].repositories[repositoryName];
-    const openRepoBranchSuggestion = createSuggestion(`OPEN ${repositoryName} BRANCH`, `OPEN "${repositoryName}" BRANCH - Open the branches of the repository`);
-    const openRepoTagSuggestion = createSuggestion(`OPEN ${repositoryName} TAG`, `OPEN "${repositoryName}" TAG - Open the tags of the repository`);
-    const openRepoCommitSuggestion = createSuggestion(`OPEN ${repositoryName} COMMIT`, `OPEN "${repositoryName}" COMMIT - Open the commit history of the repository`);
-    const openRepoPRSuggestion = createSuggestion(`OPEN ${repositoryName} PR`, `OPEN "${repositoryName}" PR - Open the pull requests of the repository`);
-    const openRepoPipelineSuggestion = createSuggestion(`OPEN ${repositoryName} PIPELINE`, `OPEN "${repositoryName}" PIPELINE - Open the pipelines of the repository`);
-    const openRepoDeploySuggestion = createSuggestion(`OPEN ${repositoryName} DEPLOY`, `OPEN "${repositoryName}" DEPLOY - Open the deployments of the repository`);
-    const openRepoCompareSuggestion = createSuggestion(`OPEN ${repositoryName} COMPARE`, `OPEN "${repositoryName}" COMPARE - Compare branches or tags`);
-    const openRepoDiffSuggestion = createSuggestion(`OPEN ${repositoryName} DIFF`, `OPEN "${repositoryName}" DIFF - Diff branches or tags`);
+    const openRepoBranchSuggestion = createSuggestion(`${repositoryName} BRANCH`, `Open the branches of the repository`);
+    const openRepoTagSuggestion = createSuggestion(`${repositoryName} TAG`, `Open the tags of the repository`);
+    const openRepoCommitSuggestion = createSuggestion(`${repositoryName} COMMIT`, `Open the commit history of the repository`);
+    const openRepoPRSuggestion = createSuggestion(`${repositoryName} PR`, `Open the pull requests of the repository`);
+    const openRepoPipelineSuggestion = createSuggestion(`${repositoryName} PIPELINE`, `Open the pipelines of the repository`);
+    const openRepoDeploySuggestion = createSuggestion(`${repositoryName} DEPLOY`, `Open the deployments of the repository`);
+    const openRepoCompareSuggestion = createSuggestion(`${repositoryName} COMPARE`, `Compare branches or tags`);
+    const openRepoDiffSuggestion = createSuggestion(`${repositoryName} DIFF`, `Diff branches or tags`);
 
-    const command = fragments[2]?.toUpperCase() || '';
+    const command = fragments[1]?.toUpperCase() || '';
+    console.log(command)
     if (command === 'BRANCH') {
-        const branch = fragments[3] || '';
+        const branch = fragments[2] || '';
+        const subCommand = fragments[3]?.toUpperCase() || '';
+        const commit = fragments[4]?.toLowerCase() || '';
         if (branch === '') {
             suggestions.push(openRepoBranchSuggestion);
         }
-        if (repositoryData.branches[branch] === undefined) {
-            Object.keys(repositoryData.branches)
-                .filter(branchId => branchId.includes(branch))
-                .sort((a, b) => {
-                    return repositoryData.branches[b].lastUsed - repositoryData.branches[a].lastUsed;
-                })
-                .map(branch => {
-                    suggestions.push(createSuggestion(`OPEN ${repositoryName} BRANCH ${branch}`, `OPEN "${repositoryName}" BRANCH "${branch}" - Open the branch`));
-                });
-        } else {
-            const subCommand = fragments[4]?.toUpperCase() || '';
-            if (subCommand === 'COMMIT') {
-                const commit = fragments[5]?.toLowerCase() || '';
-                if (commit === '') {
-                    suggestions.push(createSuggestion(`OPEN ${repositoryName} BRANCH ${branch} COMMIT`, `OPEN "${repositoryName}" BRANCH "${branch}" COMMIT - Open the commit history of the branch`));
-                }
-                Object.keys(repositoryData.commits)
-                    .filter(commit => repositoryData.commits[commit].branches.includes(branch))
-                    .map(commit => {
-                        suggestions.push(createSuggestion(`OPEN ${repositoryName} BRANCH ${branch} COMMIT ${commit}`, `... COMMIT "${commit}" - [${repositoryData.commits[commit].message}]`));
-                    });
-            } else {
-                suggestions.push(createSuggestion(`OPEN ${repositoryName} BRANCH ${branch}`, `OPEN "${repositoryName}" BRANCH "${branch}" - Open the branch`));
-                suggestions.push(createSuggestion(`OPEN ${repositoryName} BRANCH ${branch} COMMIT`, `OPEN "${repositoryName}" BRANCH "${branch}" COMMIT - Open the commit history of the branch`));
-            }
-        }
+        Object.keys(repositoryData.branches)
+            .filter(branchId => branchId.includes(branch))
+            .sort((a, b) => {
+                return sortOnLastUsed(repositoryData.branches, a, b);
+            })
+            .filter(branch => subCommand === "")
+            .map(branch => {
+                suggestions.push(createSuggestion(`${repositoryName} BRANCH ${branch}`, `Open the branch`));
+            });
+        if (commit === '' && branch !== '')
+            suggestions.push(createSuggestion(`${repositoryName} BRANCH ${branch} COMMIT`, `Open the commit history of the branch`));
+        Object.keys(repositoryData.commits)
+            .filter(commit => repositoryData.commits[commit].branches.includes(branch))
+            .map(commit => {
+                suggestions.push(createSuggestion(`${repositoryName} BRANCH ${branch} COMMIT ${commit}`, escapeHtml(repositoryData.commits[commit].message)));
+            });
     } else if (command === 'TAG') {
-        const tag = fragments[3] || '';
-        if (repositoryData.tags[tag] === undefined) {
-            Object.keys(repositoryData.tags)
-                .filter(tag => tag.includes(tag))
-                .sort((a, b) => {
-                    return repositoryData.tags[b].lastUsed - repositoryData.tags[a].lastUsed;
-                })
-                .map(tag => {
-                    suggestions.push(createSuggestion(`OPEN ${repositoryName} TAG ${tag}`, `OPEN "${repositoryName}" TAG "${tag}" - Open the tag`));
-                });
-        } else {
-            const subCommand = fragments[4]?.toUpperCase() || '';
-            if (subCommand === 'COMMIT') {
-                const commit = fragments[5]?.toLowerCase() || '';
-                if (commit === '') {
-                    suggestions.push(createSuggestion(`OPEN ${repositoryName} TAG ${tag} COMMIT`, `OPEN "${repositoryName}" TAG "${tag}" COMMIT - Open the commit history of the tag`));
-                }
-                Object.keys(repositoryData.commits)
-                    .filter(commit => repositoryData.commits[commit].tags.includes(tag))
-                    .map(commit => {
-                        suggestions.push(createSuggestion(`OPEN ${repositoryName} TAG ${tag} COMMIT ${commit}`, `... COMMIT "${commit}" - [${repositoryData.commits[commit].message}]`));
-                    });
-            } else {
-                suggestions.push(createSuggestion(`OPEN ${repositoryName} TAG ${tag}`, `OPEN "${repositoryName}" TAG "${tag}" - Open the tag`));
-                suggestions.push(createSuggestion(`OPEN ${repositoryName} TAG ${tag} COMMIT`, `OPEN "${repositoryName}" TAG "${tag}" COMMIT - Open the commit history of the tag`));
-            }
-        }
+        const tag = fragments[2] || '';
+        const subCommand = fragments[3]?.toUpperCase() || '';
+        const commit = fragments[4]?.toLowerCase() || '';
+        Object.keys(repositoryData.tags)
+            .filter(tag => tag.includes(tag))
+            .sort((a, b) => {
+                return sortOnLastUsed(repositoryData.tags, a, b);
+            })
+            .filter(tag => subCommand === "")
+            .map(tag => {
+                suggestions.push(createSuggestion(`${repositoryName} TAG ${tag}`, `Open the tag`));
+            });
+        if (commit === '' && tag !== '')
+            suggestions.push(createSuggestion(`${repositoryName} TAG ${tag} COMMIT`, `Open the commit history of the tag`));
+        Object.keys(repositoryData.commits)
+            .filter(commit => repositoryData.commits[commit].tags.includes(tag))
+            .map(commit => {
+                suggestions.push(createSuggestion(`${repositoryName} TAG ${tag} COMMIT ${commit}`, repositoryData.commits[commit].message));
+            });
     } else if (command === 'COMMIT') {
-        const commit = fragments[3]?.toLowerCase() || '';
-        if (commit === '') {
-            suggestions.push(createSuggestion(`OPEN ${repositoryName} COMMIT`, `OPEN "${repositoryName}" COMMIT - Open the commit history of the repository`));
-        }
+        const commit = fragments[2]?.toLowerCase() || '';
+        if (commit === '')
+            suggestions.push(createSuggestion(`${repositoryName} COMMIT`, `Open the commit history of the repository`));
         Object.keys(repositoryData.commits)
             .filter(commitId => commitId.includes(commit))
             .sort((a, b) => {
-                return a.indexOf(commit) - b.indexOf(commit);
+                return sortOnLastUsed(repositoryData.commits, a, b);
             })
             .map(commitId => {
-                suggestions.push(createSuggestion(`OPEN ${repositoryName} COMMIT ${commitId}`, `... COMMIT "${commitId}" - [${repositoryData.commits[commitId].message}]`));
+                suggestions.push(createSuggestion(`${repositoryName} COMMIT ${commitId}`, repositoryData.commits[commitId].message));
             });
     } else if (command === "PR") {
-        const pr = fragments[3]?.toLowerCase() || '';
-        if (pr === '') {
-            suggestions.push(createSuggestion(`OPEN ${repositoryName} PR`, `OPEN "${repositoryName}" PR - Open the pull requests of the repository`));
-        }
+        const pr = fragments[2]?.toLowerCase() || '';
+        if (pr === '')
+            suggestions.push(createSuggestion(`${repositoryName} PR`, `Open the pull requests of the repository`));
         Object.keys(repositoryData.pullRequests)
             .filter(pullNo => pullNo.includes(pr))
             .sort((a, b) => {
-                return repositoryData.pullRequests[b].lastUsed - repositoryData.pullRequests[a].lastUsed;
+                return sortOnLastUsed(repositoryData.pullRequests, a, b);
             })
             .map(pullNo => {
-                suggestions.push(createSuggestion(`OPEN ${repositoryName} PR ${pullNo}`, `... PR "${pullNo}" - [${repositoryData.pullRequests[pullNo].pullName}]`));
+                suggestions.push(createSuggestion(`${repositoryName} PR ${pullNo}`, repositoryData.pullRequests[pullNo].pullName));
             });
     } else if (command === 'PIPELINE') {
-        const pipeline = fragments[3]?.toLowerCase() || '';
-        if (pipeline === '') {
-            suggestions.push(createSuggestion(`OPEN ${repositoryName} PIPELINE`, `OPEN "${repositoryName}" PIPELINE - Open the pipelines of the repository`));
-        }
+        const pipeline = fragments[2]?.toLowerCase() || '';
+        if (pipeline === '')
+            suggestions.push(createSuggestion(`${repositoryName} PIPELINE`, `Open the pipelines of the repository`));
         Object.keys(repositoryData.pipelines)
             .filter(pipelineNo => pipelineNo.includes(pipeline))
             .sort((a, b) => {
-                return repositoryData.pipelines[b].lastUsed - repositoryData.pipelines[a].lastUsed;
+                return sortOnLastUsed(repositoryData.pipelines, a, b);
             })
             .map(pipelineNo => {
-                suggestions.push(createSuggestion(`OPEN ${repositoryName} PIPELINE ${pipelineNo}`, `... PIPELINE "${pipelineNo}" - [${repositoryData.pipelines[pipelineNo].pipelineName}]`));
+                suggestions.push(createSuggestion(`${repositoryName} PIPELINE ${pipelineNo}`, repositoryData.pipelines[pipelineNo].pipelineName));
             });
     } else if (command === 'DEPLOY') {
-        const deploy = fragments[3]?.toLowerCase() || '';
-        if (deploy === '') {
-            suggestions.push(createSuggestion(`OPEN ${repositoryName} DEPLOY`, `OPEN "${repositoryName}" DEPLOY - Open the deployments of the repository`));
-        }
+        const deploy = fragments[2]?.toLowerCase() || '';
+        if (deploy === '')
+            suggestions.push(createSuggestion(`${repositoryName} DEPLOY`, `Open the deployments of the repository`));
         Object.keys(repositoryData.environments)
             .filter(environmentName => environmentName.includes(deploy))
             .filter(environmentName => repositoryData.environments[environmentName].environmentId !== undefined)
             .sort((a, b) => {
-                return repositoryData.environments[b].lastUsed - repositoryData.environments[a].lastUsed;
+                return sortOnLastUsed(repositoryData.environments, a, b);
             });
     } else if (command === 'COMPARE') {
-        const branchCompare = fragments[3] || '';
-        if (repositoryData.branches[branchCompare] === undefined) {
-            Object.keys(repositoryData.branches)
-                .filter(branch => branch.includes(branchCompare))
-                .sort((a, b) => {
-                    return repositoryData.branches[b].lastUsed - repositoryData.branches[a].lastUsed;
-                })
-                .map(branch => {
-                    suggestions.push(createSuggestion(`OPEN ${repositoryName} COMPARE ${branch}`, `OPEN "${repositoryName}" COMPARE "${branch}" - Compare branches or tags`));
-                });
-        } else {
-            const subCommandCompare = fragments[4]?.toUpperCase() || '';
-            if (subCommandCompare === 'TO') {
-                const branchTo = fragments[5] || '';
-                if (repositoryData.branches[branchTo] !== undefined) {
-                    suggestions.push(createSuggestion(`OPEN ${repositoryName} COMPARE ${branchCompare} TO ${branchTo}`, `OPEN "${repositoryName}" COMPARE "${branchCompare}" TO "${branchTo}" - Compare branches or tags`));
-                } else {
-                    Object.keys(repositoryData.branches)
-                        .filter(branch => branch.includes(branchTo))
-                        .filter(branch => branch !== branchCompare)
-                        .sort((a, b) => {
-                            return repositoryData.branches[b].lastUsed - repositoryData.branches[a].lastUsed;
-                        })
-                        .map(branch => {
-                            suggestions.push(createSuggestion(`OPEN ${repositoryName} COMPARE ${branchCompare} TO ${branch}`, `OPEN "${repositoryName}" COMPARE "${branchCompare}" TO "${branch}" - Compare branches or tags`));
-                        });
-                }
-            } else {
-                suggestions.push(createSuggestion(`OPEN ${repositoryName} COMPARE ${branchCompare}`, `OPEN "${repositoryName}" COMPARE "${branchCompare}" - Compare branches or tags`));
-                Object.keys(repositoryData.branches)
-                    .filter(branch => branch !== branchCompare)
-                    .sort((a, b) => {
-                        return repositoryData.branches[b].lastUsed - repositoryData.branches[a].lastUsed;
-                    })
-                    .map(branch => {
-                        suggestions.push(createSuggestion(`OPEN ${repositoryName} COMPARE ${branchCompare} TO ${branch}`, `OPEN "${repositoryName}" COMPARE "${branchCompare}" TO "${branch}" - Compare branches or tags`));
-                    });
-            }
-        }
+        const branchCompare = fragments[2] || '';
+        const subCommandCompare = fragments[3]?.toUpperCase() || '';
+        const branchTo = fragments[4] || '';
+        const combinedCompareKeyValues = {}
+        Object.keys(repositoryData.branches).map(branch => {
+            combinedCompareKeyValues[branch] = repositoryData.branches[branch].lastUsed;
+        })
+        Object.keys(repositoryData.tags).map(tag => {
+            combinedCompareKeyValues[tag] = repositoryData.tags[tag].lastUsed;
+        });
+        Object.keys(combinedCompareKeyValues)
+            .filter(branch => branch.includes(branchCompare))
+            .filter(branch => branch !== branchCompare)
+            .filter(branch => subCommandCompare === "")
+            .sort((a, b) => {
+                return combinedCompareKeyValues[b] - combinedCompareKeyValues[a];
+            })
+            .map(branch => {
+                suggestions.push(createSuggestion(`${repositoryName} COMPARE ${branch}`, `Compare branches or tags`));
+            });
+        Object.keys(combinedCompareKeyValues)
+            .filter(branch => branch.includes(branchTo))
+            .filter(branch => branch !== branchCompare)
+            .filter(branch => branchCompare !== '')
+            .sort((a, b) => {
+                return combinedCompareKeyValues[b] - combinedCompareKeyValues[a];
+            })
+            .map(branch => {
+                suggestions.push(createSuggestion(`${repositoryName} COMPARE ${branchCompare} TO ${branch}`, `Compare branches or tags`));
+            });
     } else if (command === 'DIFF') {
-        const branchDiff = fragments[3] || '';
+        const branchDiff = fragments[2] || '';
+        const subCommandDiff = fragments[3]?.toUpperCase() || '';
+        const branchTo = fragments[4] || '';
         const combinedBranchesKeyValues = {}
         Object.keys(repositoryData.branches).map(branch => {
             combinedBranchesKeyValues[branch] = repositoryData.branches[branch].lastUsed;
@@ -664,53 +632,40 @@ function suggestOpen(fragments) {
         Object.keys(repositoryData.tags).map(tag => {
             combinedBranchesKeyValues[tag] = repositoryData.tags[tag].lastUsed;
         });
-        if (combinedBranchesKeyValues[branchDiff] === undefined) {
-            Object.keys(combinedBranchesKeyValues)
-                .filter(branch => branch.includes(branchDiff))
-                .sort((a, b) => {
-                    return combinedBranchesKeyValues[b] - combinedBranchesKeyValues[a];
-                })
-                .map(branch => {
-                    suggestions.push(createSuggestion(`OPEN ${repositoryName} DIFF ${branch}`, `OPEN "${repositoryName}" DIFF "${branch}" - Diff branches or tags`));
-                });
-        } else {
-            const subCommandDiff = fragments[4]?.toUpperCase() || '';
-            if (subCommandDiff === 'TO') {
-                const branchTo = fragments[5] || '';
-                if (repositoryData.branches[branchTo] !== undefined) {
-                    suggestions.push(createSuggestion(`OPEN ${repositoryName} DIFF ${branchDiff} TO ${branchTo}`, `OPEN "${repositoryName}" DIFF "${branchDiff}" TO "${branchTo}" - Diff branches or tags`));
-                } else {
-                    Object.keys(combinedBranchesKeyValues)
-                        .filter(branch => branch.includes(branchTo))
-                        .filter(branch => branch !== branchDiff)
-                        .sort((a, b) => {
-                            return combinedBranchesKeyValues[b] - combinedBranchesKeyValues[a];
-                        })
-                        .map(branch => {
-                            suggestions.push(createSuggestion(`OPEN ${repositoryName} DIFF ${branchDiff} TO ${branch}`, `OPEN "${repositoryName}" DIFF "${branchDiff}" TO "${branch}" - Diff branches or tags`));
-                        });
-                }
-            } else {
-                suggestions.push(createSuggestion(`OPEN ${repositoryName} DIFF ${branchDiff}`, `OPEN "${repositoryName}" DIFF "${branchDiff}" - Diff branches or tags`));
-                Object.keys(combinedBranchesKeyValues)
-                    .filter(branch => branch !== branchDiff)
-                    .sort((a, b) => {
-                        return combinedBranchesKeyValues[b] - combinedBranchesKeyValues[a];
-                    })
-                    .map(branch => {
-                        suggestions.push(createSuggestion(`OPEN ${repositoryName} DIFF ${branchDiff} TO ${branch}`, `OPEN "${repositoryName}" DIFF "${branchDiff}" TO "${branch}" - Diff branches or tags`));
-                    });
-            }
-        }
+        Object.keys(combinedBranchesKeyValues)
+            .filter(branch => branch.includes(branchDiff))
+            .filter(branch => subCommandDiff === "")
+            .sort((a, b) => {
+                return combinedBranchesKeyValues[b] - combinedBranchesKeyValues[a];
+            })
+            .map(branch => {
+                suggestions.push(createSuggestion(`${repositoryName} DIFF ${branch}`, `Diff branches or tags`));
+            });
+        Object.keys(combinedBranchesKeyValues)
+            .filter(branch => branch.includes(branchTo))
+            .filter(branch => branch !== branchDiff)
+            .filter(branch => branchDiff !== '')
+            .sort((a, b) => {
+                return combinedBranchesKeyValues[b] - combinedBranchesKeyValues[a];
+            })
+            .map(branch => {
+                suggestions.push(createSuggestion(`${repositoryName} DIFF ${branchDiff} TO ${branch}`, `Diff branches or tags`));
+            });
     } else {
-        suggestions.push(openRepoBranchSuggestion);
-        suggestions.push(openRepoTagSuggestion);
-        suggestions.push(openRepoCommitSuggestion);
-        suggestions.push(openRepoPRSuggestion);
-        suggestions.push(openRepoPipelineSuggestion);
-        suggestions.push(openRepoDeploySuggestion);
-        suggestions.push(openRepoCompareSuggestion);
-        suggestions.push(openRepoDiffSuggestion);
+        const tempSuggestions = [openRepoBranchSuggestion,
+            openRepoTagSuggestion,
+            openRepoCommitSuggestion,
+            openRepoPRSuggestion,
+            openRepoPipelineSuggestion,
+            openRepoDeploySuggestion,
+            openRepoCompareSuggestion,
+            openRepoDiffSuggestion];
+
+        tempSuggestions.filter(suggestion => {
+            const content = suggestion.content.split(' ');
+            const lastFragment = content.pop();
+            return lastFragment.includes(command);
+        }).map(suggestion => suggestions.push(suggestion));
     }
     return suggestions;
 }
@@ -718,8 +673,13 @@ function suggestOpen(fragments) {
 function createSuggestion(content, description) {
     return {
         content: content,
-        description: description
+        description: escapeHtml(content + " : " + description)
     }
+}
+
+
+function sortOnLastUsed(data, a, b) {
+    return data[b].lastUsed - data[a].lastUsed;
 }
 
 /* Omnibox: Input processing */
@@ -744,14 +704,11 @@ function processInput(fragments) {
             case 'LIST':
                 processList(fragments);
                 break;
-            case 'OPEN':
-                processOpen(fragments);
-                break;
             case 'HELP':
                 chrome.tabs.create({url: 'help.html'});
                 break;
             default:
-                notifyUser('Unknown command', 'Please enter a valid command');
+                processOpen(fragments);
         }
     } catch (e) {
         console.error('Error', e);
@@ -788,7 +745,7 @@ function processList(fragments) {
 }
 
 function processOpen(fragments) {
-    const repositoryName = fragments[1]?.toLowerCase() || '';
+    const repositoryName = fragments[0]?.toLowerCase() || '';
     if (repositoryName === undefined || repositoryName === '') {
         notifyUser('No repository name', 'Please enter a repository name');
         return;
@@ -796,7 +753,7 @@ function processOpen(fragments) {
     const workspaceName = bitbucketQueryData.active;
     let url = `https://bitbucket.org/${workspaceName}/${repositoryName}/`;
 
-    const urlSuffix = getSuffixPathForOpen(fragments, url);
+    const urlSuffix = getSuffixPathForOpen(fragments);
     if (urlSuffix === null) {
         return;
     }
@@ -804,71 +761,69 @@ function processOpen(fragments) {
 }
 
 
-function getSuffixPathForOpen(fragments, url) {
-    switch (fragments[2]?.toUpperCase()) {
+function getSuffixPathForOpen(fragments) {
+    switch (fragments[1]?.toUpperCase()) {
         case 'BRANCH':
-            const branch = fragments[3] || '';
+            const branch = fragments[2] || '';
             if (branch === '') {
                 return 'branches';
             }
-            if (fragments[4]?.toUpperCase() === 'COMMIT') {
-                const commit = fragments[5]?.toLowerCase() || '';
-                if (commit === '') {
+            if (fragments[3]?.toUpperCase() === 'COMMIT') {
+                const commit = fragments[4]?.toLowerCase() || '';
+                if (commit === '')
                     return `commits/branch/${branch}`;
-                }
                 return `commits/${commit}`;
             }
             return `src/${branch}`;
         case 'TAG':
-            const tag = fragments[3] || '';
+            const tag = fragments[2] || '';
             if (tag === '') {
                 notifyUser('No tag name', 'Please enter a tag name');
-                return null;
+                return `src`;
             }
-            if (fragments[4]?.toUpperCase() === 'COMMIT') {
-                return `commits/tag/${tag}`;
+            if (fragments[3]?.toUpperCase() === 'COMMIT') {
+                const commit = fragments[4]?.toLowerCase() || '';
+                if (commit === '')
+                    return `commits/tag/${tag}`;
+                return `commits/${commit}`;
             }
             return `src/${tag}`;
         case 'COMMIT':
-            const commit = fragments[3]?.toLowerCase() || '';
-            if (commit === '') {
+            const commit = fragments[2]?.toLowerCase() || '';
+            if (commit === '')
                 return `commits`;
-            }
             return `commits/${commit}`;
         case 'PR':
-            const pr = fragments[3]?.toLowerCase() || '';
-            if (pr === '') {
+            const pr = fragments[2]?.toLowerCase() || '';
+            if (pr === '')
                 return `pull-requests`;
-            }
             return `pull-requests/${pr}`;
         case 'PIPELINE':
-            const pipeline = fragments[3]?.toLowerCase() || '';
-            if (pipeline === '') {
+            const pipeline = fragments[2]?.toLowerCase() || '';
+            if (pipeline === '')
                 return `pipelines`;
-            }
             return `pipelines/results/${pipeline}`;
         case 'DEPLOY':
-            const deploy = fragments[3]?.toLowerCase() || '';
-            if (deploy === '') {
+            const deploy = fragments[2]?.toLowerCase() || '';
+            if (deploy === '')
                 return `deployments`;
-            }
             return `deployments/${deploy}`;
         case 'COMPARE':
-            const branchFrom = fragments[3] || '';
-            if (branchFrom === '' || fragments[4]?.toUpperCase() !== 'TO') {
+            const branchFrom = fragments[2] || '';
+            if (branchFrom === '' || fragments[3]?.toUpperCase() !== 'TO') {
                 notifyUser('Invalid command', 'Please use "OPEN {{repo}} COMPARE {{branch}} TO {{compare}}"');
-                return null;
+                return `branches/compare`;
             }
-            const branchTo = fragments[5] || '';
-            return `branches/compare/${branchFrom}..${branchTo}`;
+            const branchTo = fragments[4] || '';
+            return `branches/compare/${branchFrom}%0D${branchTo}`;
         case 'DIFF':
-            const branchDiff = fragments[3] || '';
+            const branchDiff = fragments[2] || '';
             if (branchDiff === '') {
                 notifyUser('No branch name', 'Please enter a branch name');
-                return null;
+                return `branches`
             }
-            if (fragments[4]?.toUpperCase() === 'TO') {
-                const branchToDiff = fragments[5] || '';
+            if (fragments[3]?.toUpperCase() === 'TO') {
+                const branchToDiff = fragments[4] || '';
                 return `branch/${branchDiff}?dest=${branchToDiff}`;
             }
             return `branch/${branchDiff}`;
@@ -899,5 +854,23 @@ function notifyUser(title, message, requireInteraction = false) {
 function saveToLocalStorage() {
     chrome.storage.local.set(bitbucketQueryData).then(() => {
         console.log(bitbucketQueryData, "Data is set to local storage");
+    });
+}
+
+/*Text utility*/
+function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, function (match) {
+        switch (match) {
+            case '&':
+                return '&amp;';
+            case '<':
+                return '&lt;';
+            case '>':
+                return '&gt;';
+            case '"':
+                return '&quot;';
+            case "'":
+                return '&#39;';
+        }
     });
 }
