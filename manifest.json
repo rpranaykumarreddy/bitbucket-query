@@ -25,11 +25,7 @@
             "matches": [
                 "https://bitbucket.org/*"
             ],
-            "permissions": [
-                "storage",
-                "tabs",
-                "activeTab"
-            ]
+            "permissions": []
         }
     ],
     "permissions": [

@@ -197,7 +197,7 @@ function scrapeDataFromBranchesPage() {
 }
 
 function scrapeDataFromPullOverviewPage() {
-    return document.getElementsByTagName("form")[0].innerText;
+    return document.getElementsByTagName("form")[0]?.innerText || "";
 }
 
 function scrapeDataFromPullRequestsPage() {
